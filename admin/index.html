@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin · The SYK Atelier</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="theme-color" content="#D8C5AD" />
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body class="lux" data-no-chrome>
+
+  <!-- Login -->
+  <section class="login-wrap lux-glow" id="view-login" data-sparkles hidden>
+    <div class="login-card">
+      <div data-emblem></div>
+      <p class="eyebrow-lines">The SYK Atelier · Private access</p>
+      <h1>Admin <span class="accent-text">sign in</span></h1>
+      <div class="alert ok" id="preview-login" hidden style="margin-bottom:20px">
+        Design preview: Supabase is not connected yet, so sign-in is not available.
+        <div style="margin-top:12px"><button class="btn btn-sm" type="button" id="open-preview">Open dashboard preview</button></div>
+      </div>
+      <form id="login-form" novalidate>
+        <div class="field">
+          <label for="email">Email</label>
+          <input class="input" id="email" name="email" type="email" autocomplete="email" required />
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input class="input" id="password" name="password" type="password" autocomplete="current-password" required />
+        </div>
+        <p class="alert" id="login-error" role="alert" hidden></p>
+        <button class="btn" type="submit" id="login-btn">Sign in</button>
+      </form>
+      <p style="margin-top:22px;font-size:14px"><a href="/" class="muted">← Back to website</a></p>
+    </div>
+  </section>
+
+  <!-- Admin app -->
+  <div class="admin-shell" id="view-app" hidden>
+    <aside class="admin-side">
+      <a class="admin-brand" href="#/dashboard">
+        <span data-emblem class="sm" style="width:44px;height:49px;margin:0"></span>
+        <span class="t">The SYK Atelier<small>Certificate studio</small></span>
+      </a>
+      <nav class="admin-nav" aria-label="Admin">
+        <a href="#/dashboard" data-route="dashboard"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="6" height="6" rx="1.5"/><rect x="11" y="3" width="6" height="4" rx="1.5"/><rect x="11" y="9" width="6" height="8" rx="1.5"/><rect x="3" y="11" width="6" height="6" rx="1.5"/></svg>Dashboard</a>
+        <a href="#/new" data-route="new"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7.5"/><path d="M10 6.5v7M6.5 10h7"/></svg>Add New Student</a>
+        <a href="#/students" data-route="students"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 5h12M4 10h12M4 15h8"/></svg>Student Records</a>
+      </nav>
+      <div class="foot">
+        <span class="who" id="who"></span>
+        <a href="/" class="muted" target="_blank" rel="noopener">View website ↗</a>
+        <button class="btn btn-sm btn-ghost" type="button" id="logout">Sign out</button>
+      </div>
+    </aside>
+
+    <main class="admin-main">
+      <div class="alert ok" id="preview-app" hidden style="margin-bottom:24px">
+        Design preview: sample records are shown. Submitting the form builds the certificate PDF so you can check the template, but nothing is saved.
+      </div>
+
+      <!-- Dashboard -->
+      <section id="route-dashboard" hidden>
+        <div class="admin-head">
+          <div>
+            <p class="eyebrow">Dashboard</p>
+            <h1>Certificates <span class="accent-text">overview</span></h1>
+          </div>
+          <a class="btn" href="#/new">+ Add New Student</a>
+        </div>
+        <dl class="stats">
+          <div class="stat is-lead"><span class="ic"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2.5" y="3.5" width="15" height="10" rx="1.5"/><circle cx="10" cy="14" r="2.6"/><path d="M8.6 16.2 8 18.5M11.4 16.2l.6 2.3"/></svg></span><dt>Total certificates issued</dt><dd id="stat-total">–</dd></div>
+          <div class="stat"><span class="ic"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="14" height="13" rx="2"/><path d="M3 8h14M7 2.5v3M13 2.5v3"/></svg></span><dt>Issued this month</dt><dd id="stat-month">–</dd></div>
+          <div class="stat"><span class="ic"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7.5"/><path d="M10 6v4.5l3 1.8"/></svg></span><dt>Pending (not published)</dt><dd id="stat-draft">–</dd></div>
+        </dl>
+        <div class="panel">
+          <div class="panel-head"><h2>Recent student records</h2><a class="link-caps" href="#/students">View all</a></div>
+          <div class="table-wrap" id="recent-table"></div>
+        </div>
+      </section>
+
+      <!-- Student records -->
+      <section id="route-students" hidden>
+        <div class="admin-head">
+          <div>
+            <p class="eyebrow">Student records</p>
+            <h1>All <span class="accent-text">students</span></h1>
+          </div>
+          <a class="btn" href="#/new">+ Add New Student</a>
+        </div>
+        <div class="panel"><div class="table-wrap" id="all-table"></div></div>
+      </section>
+
+      <!-- Add student -->
+      <section id="route-new" hidden>
+        <div class="admin-head">
+          <div>
+            <p class="eyebrow">Add new student</p>
+            <h1>Issue an internship <span class="accent-text">certificate</span></h1>
+            <p class="muted" style="margin-top:10px;max-width:640px">The certificate ID, QR code and PDF are created automatically. The student appears on the public Internship page only after the PDF is safely stored.</p>
+          </div>
+        </div>
+
+        <form id="student-form" class="form-steps" novalidate>
+          <div class="form-card is-lead">
+            <div class="form-card-head"><span class="num">1</span><div><h2><span class="k">Step 1:</span> Student details</h2><p>As they should appear on the certificate.</p></div></div>
+            <div class="form-grid">
+              <div class="field"><label for="f-student_name">Student full name</label><input class="input" id="f-student_name" name="student_name" required maxlength="120" autocomplete="off" /></div>
+              <div class="field"><label for="f-father_name">Father's name</label><input class="input" id="f-father_name" name="father_name" required maxlength="120" autocomplete="off" /></div>
+              <div class="field"><label for="f-course_name">Course name</label><input class="input" id="f-course_name" name="course_name" required maxlength="120" placeholder="e.g. B.A. / B.Com. / B.Sc." /></div>
+              <div class="field"><label for="f-semester">Semester</label><input class="input" id="f-semester" name="semester" required maxlength="20" placeholder="e.g. IV" /></div>
+              <div class="field"><label for="f-roll_number">Roll number</label><input class="input" id="f-roll_number" name="roll_number" required maxlength="40" /></div>
+              <div class="field"><label for="f-college_name">College name</label><input class="input" id="f-college_name" name="college_name" required maxlength="160" /></div>
+            </div>
+          </div>
+
+          <div class="form-card">
+            <div class="form-card-head"><span class="num">2</span><div><h2><span class="k">Step 2:</span> Internship details</h2><p>Minimum duration is 120 hours.</p></div></div>
+            <div class="form-grid">
+              <div class="field full"><label for="f-training_name">Internship / Training name</label><input class="input" id="f-training_name" name="training_name" required maxlength="120" placeholder="e.g. Crochet Product Design Internship" /></div>
+              <div class="field"><label for="f-start_date">Internship start date</label><input class="input" id="f-start_date" name="start_date" type="date" required /></div>
+              <div class="field"><label for="f-end_date">Internship completion date</label><input class="input" id="f-end_date" name="end_date" type="date" required /></div>
+              <div class="field"><label for="f-hours">Internship hours</label><input class="input" id="f-hours" name="hours" type="number" min="120" max="2000" step="1" required /><span class="hint">Minimum 120 hours.</span></div>
+              <div class="field"><label for="f-academic_year">Academic year</label><input class="input" id="f-academic_year" name="academic_year" required pattern="\d{4}-\d{2}" placeholder="e.g. 2026-27" maxlength="7" /><span class="hint">Format: 2026-27</span></div>
+              <div class="field full"><label for="f-duties">Internship duties / responsibilities</label><textarea class="textarea" id="f-duties" name="duties" required maxlength="600"></textarea><span class="hint"><span id="duties-count">0</span>/600 characters. Printed on the certificate.</span></div>
+            </div>
+          </div>
+
+          <div class="form-card">
+            <div class="form-card-head"><span class="num">3</span><div><h2><span class="k">Step 3:</span> Authorized signatory</h2><p>Signature and seal images are set in js/config.js.</p></div></div>
+            <div class="form-grid">
+              <div class="field"><label for="f-signatory_name">Signatory name</label><input class="input" id="f-signatory_name" name="signatory_name" required maxlength="80" /></div>
+              <div class="field"><label for="f-signatory_designation">Designation</label><input class="input" id="f-signatory_designation" name="signatory_designation" required maxlength="80" placeholder="e.g. Founder &amp; Director" /></div>
+              <label class="check full">
+                <input type="checkbox" id="f-confirm" required />
+                <span>I have checked these details. The certificate cannot be edited after it is issued.</span>
+              </label>
+            </div>
+            <p class="alert" id="form-error" role="alert" hidden style="margin-top:20px"></p>
+            <div class="form-actions" style="margin-top:24px">
+              <button class="btn btn-ghost" type="reset">Clear form</button>
+              <button class="btn btn-accent" type="submit" id="issue-btn">Generate &amp; issue certificate</button>
+            </div>
+          </div>
+        </form>
+
+        <div class="form-card is-lead" id="issue-result" hidden style="text-align:center;padding:clamp(28px,4vw,48px)"></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/js/config.js"></script>
+  <script src="/vendor/supabase-js-2.119.2.min.js" defer></script>
+  <script src="/vendor/jspdf-2.5.2.umd.min.js" defer></script>
+  <script src="/vendor/qrcode-1.0.0.min.js" defer></script>
+  <script src="/js/common.js" defer></script>
+  <script src="/js/certificate-pdf.js" defer></script>
+  <script src="/js/admin.js" defer></script>
+</body>
+</html>

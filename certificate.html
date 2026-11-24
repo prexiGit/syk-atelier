@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Certificate Verification · The SYK Atelier</title>
+  <meta name="description" content="Verify an internship certificate issued by The SYK Atelier, India." />
+  <meta name="theme-color" content="#D8C5AD" />
+  <meta name="robots" content="noindex" />
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body class="lux" data-preview-notice>
+  <header data-site-header="solid"></header>
+
+  <main>
+    <section class="lux-hero lux-glow" data-sparkles>
+      <div class="container wide">
+        <div class="emblem" id="v-emblem"></div>
+        <p class="eyebrow-lines">Certificate verification</p>
+        <h1 class="lux-title" id="v-title"><span class="line">Checking…</span></h1>
+        <p class="lux-lede" id="v-sub">Looking up this certificate in The SYK Atelier records.</p>
+        <div class="verify-status" id="v-status"></div>
+      </div>
+    </section>
+
+    <section class="section" id="v-body" hidden style="padding-top:0;padding-bottom:clamp(64px,9vw,120px)">
+      <div class="container wide verify-layout">
+        <div class="pdf-frame" id="v-pdf"></div>
+        <aside class="info-card">
+          <p class="title">Certificate details</p>
+          <dl class="facts" id="v-facts"></dl>
+          <div class="side-actions">
+            <button class="btn btn-accent" type="button" id="v-download">Download Certificate</button>
+            <a class="btn btn-ghost" href="/internships.html">All certified students</a>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <footer data-site-footer></footer>
+
+  <script src="/js/config.js"></script>
+  <script src="/vendor/supabase-js-2.119.2.min.js" defer></script>
+  <script src="/js/common.js" defer></script>
+  <script src="/js/verify.js" defer></script>
+</body>
+</html>
