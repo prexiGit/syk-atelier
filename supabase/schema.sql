@@ -76,7 +76,7 @@ revoke all on public.admins from anon;
 -- Admins sign in as "authenticated"; RLS policies below still decide which rows they can touch.
 -- Visitors ("anon") get no table access at all and read only through the functions in section 5.
 grant usage on schema public to anon, authenticated;
-grant select, insert, update on public.certificates to authenticated;
+grant select, insert, update, delete on public.certificates to authenticated;
 grant select on public.admins to authenticated;
 
 drop policy if exists "Admins read certificates" on public.certificates;
@@ -93,6 +93,11 @@ create policy "Admins publish drafts" on public.certificates
   for update to authenticated
   using (public.is_admin() and status = 'draft')
   with check (public.is_admin());
+
+-- Removing a wrongly issued certificate. Its ID is never reused and its QR link then shows "invalid".
+drop policy if exists "Admins delete certificates" on public.certificates;
+create policy "Admins delete certificates" on public.certificates
+  for delete to authenticated using (public.is_admin());
 
 drop policy if exists "Admins read own admin row" on public.admins;
 create policy "Admins read own admin row" on public.admins
@@ -172,6 +177,11 @@ drop policy if exists "Admins replace draft PDFs" on storage.objects;
 create policy "Admins replace draft PDFs" on storage.objects
   for update to authenticated
   using (bucket_id = 'certificates' and public.is_admin() and not public.is_published_pdf(name));
+
+drop policy if exists "Admins delete certificate PDFs" on storage.objects;
+create policy "Admins delete certificate PDFs" on storage.objects
+  for delete to authenticated
+  using (bucket_id = 'certificates' and public.is_admin());
 
 -- 7. Make your login an administrator.
 -- First: Authentication → Users → Add user (email + password, auto-confirm).
