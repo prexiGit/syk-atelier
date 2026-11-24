@@ -72,6 +72,13 @@ alter table public.admins enable row level security;
 revoke all on public.certificates from anon;
 revoke all on public.admins from anon;
 
+-- Newer Supabase projects don't grant table access to the API roles automatically.
+-- Admins sign in as "authenticated"; RLS policies below still decide which rows they can touch.
+-- Visitors ("anon") get no table access at all and read only through the functions in section 5.
+grant usage on schema public to anon, authenticated;
+grant select, insert, update, delete on public.certificates to authenticated;
+grant select on public.admins to authenticated;
+
 drop policy if exists "Admins read certificates" on public.certificates;
 create policy "Admins read certificates" on public.certificates
   for select to authenticated using (public.is_admin());
@@ -86,6 +93,11 @@ create policy "Admins publish drafts" on public.certificates
   for update to authenticated
   using (public.is_admin() and status = 'draft')
   with check (public.is_admin());
+
+-- Removing a wrongly issued certificate. Its ID is never reused and its QR link then shows "invalid".
+drop policy if exists "Admins delete certificates" on public.certificates;
+create policy "Admins delete certificates" on public.certificates
+  for delete to authenticated using (public.is_admin());
 
 drop policy if exists "Admins read own admin row" on public.admins;
 create policy "Admins read own admin row" on public.admins
@@ -142,7 +154,8 @@ grant execute on function public.is_admin() to anon, authenticated;
 grant execute on function public.is_published_pdf(text) to anon, authenticated;
 
 -- The table's ID uses the sequence on insert
-grant usage on sequence public.certificate_number_seq to authenticated;
+grant usage, select on sequence public.certificate_number_seq to authenticated;
+grant execute on function public.next_certificate_id() to authenticated;
 
 -- 6. Storage: PRIVATE bucket. Visitors can read a PDF only once its certificate is published.
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
@@ -164,6 +177,11 @@ drop policy if exists "Admins replace draft PDFs" on storage.objects;
 create policy "Admins replace draft PDFs" on storage.objects
   for update to authenticated
   using (bucket_id = 'certificates' and public.is_admin() and not public.is_published_pdf(name));
+
+drop policy if exists "Admins delete certificate PDFs" on storage.objects;
+create policy "Admins delete certificate PDFs" on storage.objects
+  for delete to authenticated
+  using (bucket_id = 'certificates' and public.is_admin());
 
 -- 7. Make your login an administrator.
 -- First: Authentication → Users → Add user (email + password, auto-confirm).

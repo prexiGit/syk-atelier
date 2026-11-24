@@ -513,3 +513,16 @@ table.records { width: 100%; min-width: 900px; border-collapse: collapse; font-s
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
 }
+
+/* Delete action + confirmation */
+.records .actions .icon-btn { width: 36px; padding: 0; justify-content: center; }
+.icon-btn svg { width: 17px; height: 17px; }
+.lux .btn-ghost.danger { color: #8B2E24; border-color: transparent; box-shadow: 0 0 0 1px rgba(139,46,36,.45) inset; }
+.lux .btn-ghost.danger:hover { background: #8B2E24; color: #F2E9DD; box-shadow: 0 0 0 1px #8B2E24 inset; }
+.btn-danger, .lux .btn-danger { background: #8B2E24; border-color: #8B2E24; color: #F2E9DD; }
+.btn-danger:hover, .lux .btn-danger:hover { background: #6F231B; border-color: #6F231B; color: #F2E9DD; }
+.confirm-dialog { max-width: 480px; width: 100%; padding: clamp(24px, 4vw, 34px); }
+.confirm-dialog h2 { font-size: clamp(24px, 2.6vw, 30px); font-weight: 600; margin: 6px 0 14px; overflow-wrap: anywhere; }
+.confirm-dialog p.muted { margin-bottom: 10px; }
+.confirm-dialog .alert { margin-top: 14px; }
+.confirm-dialog .form-actions { margin-top: 24px; justify-content: flex-end; }

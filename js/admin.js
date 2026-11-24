@@ -147,6 +147,7 @@
                   ? `<a class="btn btn-sm btn-ghost" href="/certificate/${encodeURIComponent(r.certificate_id)}" target="_blank" rel="noopener">View</a>
                      <button class="btn btn-sm" type="button" data-pdf="${esc(r.certificate_id)}">PDF</button>`
                   : `<button class="btn btn-sm" type="button" data-retry="${esc(r.certificate_id)}">Finish issuing</button>`}
+                <button class="btn btn-sm btn-ghost icon-btn danger" type="button" data-delete="${esc(r.certificate_id)}" aria-label="Delete ${esc(r.student_name)} (${esc(r.certificate_id)})" title="Delete"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3.5 5.5h13M8 5.5V4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1.5M5.5 5.5l.8 10.6a1.5 1.5 0 0 0 1.5 1.4h4.4a1.5 1.5 0 0 0 1.5-1.4l.8-10.6M8.5 9v5M11.5 9v5"/></svg></button>
               </div></td>
             </tr>`).join("")}
         </tbody>
@@ -156,6 +157,11 @@
   document.addEventListener("click", async (e) => {
     const pdfBtn = e.target.closest("[data-pdf]");
     const retryBtn = e.target.closest("[data-retry]");
+    const delBtn = e.target.closest("[data-delete]");
+    if (delBtn) {
+      const rec = records.find((r) => r.certificate_id === delBtn.dataset.delete);
+      if (rec) openDelete(rec, delBtn);
+    }
     if (pdfBtn) {
       const rec = records.find((r) => r.certificate_id === pdfBtn.dataset.pdf);
       pdfBtn.disabled = true;
@@ -180,6 +186,68 @@
         retryBtn.textContent = "Finish issuing";
         alertError(err);
       }
+    }
+  });
+
+  /* ---------------- Delete certificate ---------------- */
+  let deleting = null;
+  let returnFocus = null;
+
+  function openDelete(rec, trigger) {
+    deleting = rec;
+    returnFocus = trigger;
+    $("del-name").textContent = rec.student_name;
+    $("del-id").textContent = rec.certificate_id;
+    $("del-published").hidden = rec.status !== "published";
+    $("del-error").hidden = true;
+    $("del-confirm").disabled = false;
+    $("del-confirm").textContent = "Delete certificate";
+    $("delete-modal").hidden = false;
+    $("del-cancel").focus();
+  }
+
+  function closeDelete() {
+    $("delete-modal").hidden = true;
+    deleting = null;
+    if (returnFocus && document.body.contains(returnFocus)) returnFocus.focus();
+  }
+
+  // Deletes the record first, so its QR link shows "invalid" at once, then removes the stored PDF.
+  async function deleteCertificate(rec) {
+    if (previewMode) {
+      records = records.filter((r) => r.certificate_id !== rec.certificate_id);
+      return;
+    }
+    const { error, count } = await db().from("certificates").delete({ count: "exact" }).eq("id", rec.id);
+    if (error) throw error;
+    if (!count) throw new Error("The record was not deleted. Please run the latest supabase/schema.sql so admins are allowed to delete.");
+    const paths = [...new Set([rec.pdf_path, `${rec.certificate_id}.pdf`].filter(Boolean))];
+    const { error: fileError } = await db().storage.from(BUCKET).remove(paths);
+    if (fileError) console.warn("Record deleted, but the PDF could not be removed from storage:", fileError);
+  }
+
+  $("del-cancel").addEventListener("click", closeDelete);
+  $("delete-modal").addEventListener("click", (e) => e.target.matches("[data-close]") && closeDelete());
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !$("delete-modal").hidden && !$("del-confirm").disabled) closeDelete();
+  });
+  $("del-confirm").addEventListener("click", async () => {
+    if (!deleting) return;
+    const btn = $("del-confirm");
+    btn.disabled = true;
+    btn.textContent = "Deleting…";
+    try {
+      await deleteCertificate(deleting);
+      returnFocus = null;
+      closeDelete();
+      if (!previewMode) await loadRecords();
+      route();
+    } catch (err) {
+      console.error(err);
+      $("del-error").textContent = `Could not delete: ${err && err.message ? err.message : err}`;
+      $("del-error").hidden = false;
+      btn.disabled = false;
+      btn.textContent = "Delete certificate";
     }
   });
 
