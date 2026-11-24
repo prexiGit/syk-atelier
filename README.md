@@ -96,5 +96,5 @@ js/certificate-pdf.js       certificate template (jsPDF + QRCode.js)
 supabase/schema.sql         tables, RLS, functions, storage bucket and policies
 vendor/                     supabase-js 2.119.2, jsPDF 2.5.2, QRCode.js 1.0.0, pdf.js 4.10.38
 fonts/                      Playfair Display, DM Sans (self-hosted; fonts/ttf is used inside the PDF)
-netlify.toml                redirects + headers
+netlify.toml                redirects + headers 
 ```
