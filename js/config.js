@@ -5,11 +5,12 @@
  */
 window.SYK_CONFIG = {
   // Supabase → Project Settings → API
-  SUPABASE_URL: "",
-  SUPABASE_ANON_KEY: "",
+  SUPABASE_URL: "https://oipxkpvzvicloxjlciqf.supabase.co",
+  SUPABASE_ANON_KEY: "sb_publishable_cz5RrXDgN0y4_JbMXQLApw_o7RrP-wP", // publishable key: safe in the browser
 
-  // Live website address. It is printed inside every certificate QR code,
-  // e.g. https://thesykatelier.netlify.app  →  /certificate/SYK-2026-0001
+  // Live website address printed inside every certificate QR code,
+  // e.g. https://your-site.netlify.app  →  /certificate/SYK-2026-0001
+  // Left empty, the address of the site the admin is using is taken automatically.
   SITE_URL: "",
 
   // Header and hero links. Leave empty to hide the button (no invented destinations).
